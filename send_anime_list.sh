@@ -1,2 +1,2 @@
 #!/bin/sh
-perl ./getshoboidata.pl
+perl ./send_anime_list.pl

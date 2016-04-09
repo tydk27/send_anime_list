@@ -1,0 +1,6 @@
+api:
+  url: http://cal.syoboi.jp/cal_chk.php?usr=hoge&days=1 
+mail:
+  from: hoge@hoge.com
+  to: piyo@piyo.com
+  smtp: 0.0.0.0

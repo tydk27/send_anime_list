@@ -3,6 +3,8 @@
 use strict;
 use warnings;
 
+use File::Basename qw(basename);
+use YAML::Syck;
 use LWP::UserAgent;
 use XML::Simple;
 use Email::MIME;
@@ -12,7 +14,10 @@ use Email::Sender::Transport::SMTP;
 use utf8;
 use Encode;
 
-my $api = "http://cal.syoboi.jp/cal_chk.php?usr=hoge&days=1";
+my $my_name = basename($0, '.pl');
+my $conf_file = YAML::Syck::LoadFile("$my_name.yaml");
+
+my $api = $conf_file->{api}->{url};
 
 my $ua = LWP::UserAgent->new;
 my $xml = XML::Simple->new;
@@ -51,7 +56,7 @@ if ($response->is_success) {
     }
 
     #print $body;
-    exit 0 if send_to_mail($body) == 0;
+    exit 0 if send_to_mail($body, $conf_file) == 0;
     exit 1;
 
 } else {
@@ -84,16 +89,18 @@ sub make_body {
 }
 
 sub send_to_mail {
+    my $body = shift;
+    my $conf = shift;
+
     my $utf8 = find_encoding('utf8');
 
     my ($sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst) = localtime(time);
     my $today = sprintf("%04d%02d%02d", $year + 1900, $mon + 1, $mday);
 
-    my $from = '';
-    my $to = '';
+    my $from = $conf->{mail}->{from};
+    my $to = $conf->{mail}->{to};
     my $subject = "Today's Anime Lists [$today]";
-    my $body = shift;
-    my $smtp_host = '';
+    my $smtp_host = $conf->{mail}->{smtp};
 
     my $email = Email::MIME->create(
         header => [
